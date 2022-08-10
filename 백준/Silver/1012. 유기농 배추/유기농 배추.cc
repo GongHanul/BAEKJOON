@@ -1,69 +1,59 @@
- 
 #include <iostream>
 using namespace std;
- 
-const int MAX = 51;
-int T, M, N, K;
-int map[MAX][MAX];
-int visited[MAX][MAX];
-int dy[] = {0,0,-1,1};
-int dx[] = {-1,1,0,0};
- 
+
+int arr[50][50] = { 0, };
+int used[50][50] = { 0, };
+int M, N, K;
+int dr[] = { 0, 0, 1, -1 };
+int dc[] = { 1, -1, 0, 0 };
+
 void reset() {
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < M; j++) {
-            map[i][j] = 0;
-        }
-    }
-    
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < M; j++) {
-            visited[i][j] = 0;
+            arr[i][j] = 0;
+            used[i][j] = 0;
         }
     }
 }
- 
-void DFS(int y, int x) {
-    visited[y][x] = 1;
- 
+
+void dfs(int row, int col) {
+    used[row][col] = 1;
     for (int i = 0; i < 4; i++) {
-        int nx = x + dx[i];
-        int ny = y + dy[i];
- 
-        if (nx < 0 || nx >= M || ny < 0 || ny >= N)
-            continue;
-        
-        if (map[ny][nx] == 1 && visited[ny][nx] == 0) {
-            DFS(ny, nx);
+        int n_row = row + dr[i];
+        int n_col = col + dc[i];
+        if (n_row < 0 || n_row >= N || n_col < 0 || n_col >= M) continue;
+        if (arr[n_row][n_col] == 1 && used[n_row][n_col] == 0) {
+            dfs(n_row, n_col);
         }
     }
 }
- 
+
 int main() {
-    cin >> T;
- 
-    while (T--) {
-        cin >> M >> N >> K;
- 
+    ios_base::sync_with_stdio(false);
+    cin.tie();
+    cout.tie();
+
+    int num;
+    cin >> num;
+    while (num--) {
         reset();
- 
-        while (K--) {
+        cin >> M >> N >> K;
+        for (int i = 0; i < K; i++) {
             int x, y;
             cin >> x >> y;
-            map[y][x] = 1;
+            arr[y][x] = 1;
         }
- 
-        int cnt = 0;
+
+        int bug = 0;
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < M; j++) {
-                if (map[i][j] == 1 && visited[i][j] == 0) {
-                    DFS(i, j);
-                    cnt++;
+                if (arr[i][j] == 1 && used[i][j] == 0) {
+                    dfs(i, j);
+                    bug++;
                 }
             }
         }
- 
-        cout << cnt << endl;
+        cout << bug << endl;
     }
- 
+    return 0;
 }
