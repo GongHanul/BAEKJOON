@@ -5,84 +5,80 @@ using namespace std;
 struct Node {
 	int x, y, num, dir;
 };
+
 int N, M, K;
-vector<Node> v;
-int dr[] = { -1, 1, 0, 0 };
-int dc[] = { 0, 0, -1, 1 };
-int dat[100][100] = { 0, };
+int dat[100][100];
+vector<Node> virus;
+
+int dr[] = { 0, -1, 1, 0, 0 };
+int dc[] = { 0, 0, 0, -1, 1 };
 
 void check(int row, int col) {
-	vector<int> coord;
+	vector<int> v;
+	for (int i = 0; i < K; i++) {
+		if (virus[i].x == row && virus[i].y == col) v.push_back(i);
+	}
+	int maxnum = -1, maxidx = -1, sum = 0;
 	for (int i = 0; i < v.size(); i++) {
-		if (row == v[i].x && col == v[i].y) {
-			coord.push_back(i);
+		if (maxnum < virus[v[i]].num) {
+			maxnum = virus[v[i]].num;
+			maxidx = v[i];
 		}
+		sum += virus[v[i]].num;
 	}
-	int maxx = 0, max_index = 0, dir = 0, sum_num = 0;
-	for (int i = 0; i < coord.size(); i++) {
-		if (maxx < v[coord[i]].num) {
-			maxx = v[coord[i]].num;
-			max_index = coord[i];
-			dir = v[coord[i]].dir;
-		}
-		sum_num += v[coord[i]].num;
-		v[coord[i]].num = 0;
-	}
-	for (int i = 0; i < coord.size(); i++) {
-		if (coord[i] == max_index) v[coord[i]].num = sum_num;
+	virus[maxidx].num = sum;
+	
+	for (int i = 0; i < v.size(); i++) {
+		if (v[i] != maxidx) virus[v[i]].num = 0;
 	}
 
 }
 
-void Move() {
-	for (int i = 0; i < v.size(); i++) {
-		if (v[i].num == 0) continue;
-		int nx = v[i].x + dr[v[i].dir];
-		v[i].x = nx;
-		int ny = v[i].y + dc[v[i].dir];
-		v[i].y = ny;
-		if (nx == 0 || ny == 0 || nx == N - 1 || ny == N - 1) {
-			v[i].num /= 2;
-			if (v[i].dir == 1 || v[i].dir == 3) v[i].dir -= 1;
-			else v[i].dir += 1;
+void simul() {
+	for (int i = 0; i < K; i++) {
+		if (virus[i].num == 0) continue;
+		int nrow = virus[i].x + dr[virus[i].dir];
+		int ncol = virus[i].y + dc[virus[i].dir];
+		// 약품이 칠해진 부분은 num을 절반으로 나누고 방향 180도 반대로
+		if (nrow == 0 || ncol == 0 || nrow == N - 1 || ncol == N - 1) {
+			virus[i].num /= 2;
+			if (virus[i].dir == 1) virus[i].dir = 2;
+			else if (virus[i].dir == 2) virus[i].dir = 1;
+			else if (virus[i].dir == 3) virus[i].dir = 4;
+			else virus[i].dir = 3;
 		}
-		dat[nx][ny]++;
-
+		virus[i].x = nrow; virus[i].y = ncol;
+		dat[virus[i].x][virus[i].y]++;
 	}
-	for (int i = 0; i < N; i++) {
-		for (int j = 0; j < N; j++) {
-			if (dat[i][j] > 1) {
-				check(i, j);
-				dat[i][j] = 0;
-			}
-		}
+
+	// 같은 부분에 위치할 경우 찾기
+	for (int i = 0; i < K; i++) {
+		if (dat[virus[i].x][virus[i].y] > 1) check(virus[i].x, virus[i].y);
+		dat[virus[i].x][virus[i].y] = 0;
 	}
 }
 
 int main() {
-	ios_base::sync_with_stdio(false);
-	cin.tie(NULL);
-	cout.tie(NULL);
+	ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
 	int T; cin >> T;
 	for (int t = 1; t <= T; t++) {
-		v.clear();
 		cin >> N >> M >> K;
+		virus.clear();
 		for (int i = 0; i < K; i++) {
 			int x, y, num, dir;
 			cin >> x >> y >> num >> dir;
-			v.push_back({ x, y, num, dir-1 });
+			virus.push_back({ x, y, num, dir });
 		}
 
-		for (int i = 0; i < M; i++) {
-			Move();
-			int de = 1;
+		while (M--) {
+			simul();
 		}
 		int ans = 0;
-		for (int i = 0; i < v.size(); i++) {
-			ans += v[i].num;
+		for (int i = 0; i < virus.size(); i++) {
+			ans += virus[i].num;
 		}
-		cout << "#" << t << " " << ans << "\n";
 
+		cout << "#" << t << " " << ans << "\n";
 	}
 	return 0;
 }
