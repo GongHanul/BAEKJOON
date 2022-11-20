@@ -1,11 +1,10 @@
 #include <iostream>
 #include <cstring>
-#include <vector>
 using namespace std;
 
 int N, W, H, ans;
 int map[15][12], cmap[15][12];
-vector<int> path;
+int check[12];
 
 void copy_map() {
 	for (int i = 0; i < H; i++) {
@@ -56,14 +55,13 @@ int calc() {
 	return sum;
 }
 
-void simul(int cnt) {
+void simul(int idx, int cnt) {
 	if (cnt == N) {
 		copy_map();
 		for (int j = 0; j < N; j++) {
-			int col = path[j];
 			for (int i = 0; i < H; i++) {
-				if (cmap[i][col] != 0) {
-					boom(i, col);
+				if (cmap[i][check[j]] != 0) {
+					boom(i, check[j]);
 					break;
 				}
 			}
@@ -72,10 +70,14 @@ void simul(int cnt) {
 		ans = min(ans, calc());
 		return;
 	}
-	for (int i = 0; i < W; i++) {
-		path.push_back(i);
-		simul(cnt + 1);
-		path.pop_back();
+
+	for (int i = idx; i < N; i++) {
+		if (check[i] != -1) continue;
+		for (int j = 0; j < W; j++) {
+			check[i] = j;
+			simul(i, cnt + 1);
+			check[i] = -1;
+		}
 	}
 }
 
@@ -89,8 +91,9 @@ int main() {
 				cin >> map[i][j];
 			}
 		}
+		memset(check, -1, sizeof(check));
 		ans = 987654321;
-		simul(0);
+		simul(0, 0);
 		cout << "#" << t << " " << ans << "\n";
 	}
 	return 0;
