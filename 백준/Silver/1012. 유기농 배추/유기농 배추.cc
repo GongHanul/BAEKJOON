@@ -1,59 +1,54 @@
 #include <iostream>
+#include <algorithm>
+
 using namespace std;
 
-int arr[50][50] = { 0, };
-int used[50][50] = { 0, };
-int M, N, K;
-int dr[] = { 0, 0, 1, -1 };
-int dc[] = { 1, -1, 0, 0 };
+int N, M, K;
+int map[55][55];
+int dr[] = { 1, -1, 0, 0 };
+int dc[] = { 0, 0, 1, -1 };
 
-void reset() {
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < M; j++) {
-            arr[i][j] = 0;
-            used[i][j] = 0;
-        }
-    }
+void init() {
+	for (int i = 0; i < M; i++) {
+		for (int j = 0; j < N; j++) {
+			map[i][j] = 0;
+		}
+	}
 }
 
 void dfs(int row, int col) {
-    used[row][col] = 1;
-    for (int i = 0; i < 4; i++) {
-        int n_row = row + dr[i];
-        int n_col = col + dc[i];
-        if (n_row < 0 || n_row >= N || n_col < 0 || n_col >= M) continue;
-        if (arr[n_row][n_col] == 1 && used[n_row][n_col] == 0) {
-            dfs(n_row, n_col);
-        }
-    }
+	for (int i = 0; i < 4; i++) {
+		int nrow = row + dr[i];
+		int ncol = col + dc[i];
+		if (nrow < 0 || ncol < 0 || nrow >= M || ncol >= N) continue;
+		if (map[nrow][ncol] != 1) continue;
+		map[nrow][ncol] = 0;
+		dfs(nrow, ncol);
+	}
 }
 
 int main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie();
-    cout.tie();
+	ios_base::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
+	int T; cin >> T;
+	for (int t = 0; t < T; t++) {
+		int ans = 0;
+		init();
+		cin >> M >> N >> K;
+		for (int i = 0; i < K; i++) {
+			int r, c; cin >> r >> c;
+			map[r][c] = 1;
+		}
 
-    int num;
-    cin >> num;
-    while (num--) {
-        reset();
-        cin >> M >> N >> K;
-        for (int i = 0; i < K; i++) {
-            int x, y;
-            cin >> x >> y;
-            arr[y][x] = 1;
-        }
+		for (int i = 0; i < M; i++) {
+			for (int j = 0; j < N; j++) {
+				if (map[i][j] == 1) {
+					dfs(i, j);
+					ans += 1;
+				}
+			}
+		}
 
-        int bug = 0;
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < M; j++) {
-                if (arr[i][j] == 1 && used[i][j] == 0) {
-                    dfs(i, j);
-                    bug++;
-                }
-            }
-        }
-        cout << bug << endl;
-    }
-    return 0;
+		cout << ans << "\n";
+	}
+	return 0;
 }
